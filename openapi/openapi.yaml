@@ -354,7 +354,7 @@ paths:
     patch:
       tags: [Usuarios]
       summary: Modificacion parcial de usuario
-      description: Ejemplo de uso — aprobar alta pendiente (`estado: activo`).
+      description: "Ejemplo de uso — aprobar alta pendiente (`estado: activo`)."
       operationId: patchUsuario
       security:
         - BearerAuth: []
@@ -451,7 +451,7 @@ paths:
               example:
                 - id: "64f1a2b3c4d5e6f7a8b9c0a1"
                   titulo: Reunion de claustro
-                  cuerpo: Convocatoria ordinaria el martes a las 17:00 en el salon de actos.
+                  cuerpo: "Convocatoria ordinaria el martes a las 17:00 en el salon de actos."
                   departamento: null
                   fijado: true
                   expira_en: null
@@ -1478,7 +1478,7 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorDetail'
           example:
-            detail: Se requiere uno de estos roles: admin
+            detail: "Se requiere uno de estos roles: admin"
     NotFound:
       description: Recurso no encontrado
       content:
