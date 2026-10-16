@@ -4,8 +4,8 @@ API REST de la Intranet Docente.
 
 ## Módulos con runtime
 
-Auth, usuarios (RGPD), anuncios, tickets, FEM, dashboard, auditoría y health.  
-Contrato sin implementar aún: guardias, ausencias, retrasos, notificaciones.
+Auth, usuarios (RGPD), anuncios, tickets, FEM, dashboard, auditoría, retrasos y health.  
+Contrato sin implementar aún: guardias, ausencias, notificaciones.
 
 ## Arranque local (API en el host)
 

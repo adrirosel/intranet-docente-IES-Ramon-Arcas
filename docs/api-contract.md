@@ -114,9 +114,12 @@ abierto → en_proceso → resuelto → cerrado
 
 | Método | Endpoint | Auth | Roles | Descripción |
 |--------|----------|------|-------|-------------|
-| POST | `/api/v1/retrasos` | Auth | `docente`, `admin` | Registrar retraso; `201` + `Location` |
+| POST | `/api/v1/retrasos` | Auth | `docente`, `admin` | Registrar retraso; `201` + `Location`; `registrado_por_id` del JWT |
 | GET | `/api/v1/retrasos/{id}` | Auth | `docente`, `admin` | Detalle |
 | GET | `/api/v1/alumnos/{id}/retrasos` | Auth | `docente`, `admin` | Histórico paginado (`?curso_escolar=&page=&limit=`) |
+
+Runtime: `alumno_id` es un identificador opaco (sin CRUD de alumnos). Fecha futura → 422; duplicado alumno+fecha+hora+módulo → 409.  
+`curso_escolar` se deriva de la fecha (sep–ago, formato `YYYY/YYYY+1`). Sin estadísticas agregadas para el docente (KPIs → Dashboard). Consultas de histórico se auditan (`retrasos.list_alumno`).
 
 ## Notificaciones
 
@@ -137,8 +140,8 @@ Las notificaciones **no se crean desde la API**: las generan los servicios ante 
 
 Filtros: `usuario_id`, `accion`, `recurso_tipo`, `recurso_id`, `desde`, `hasta` (ISO 8601), `page`, `limit` (default 10). Intervalo inválido (`desde` > `hasta`) → 422.
 
-Acciones runtime: `auth.login_google`, `auth.login_failed`, `auth.logout`, `usuarios.create`, `usuarios.patch`, `usuarios.put_roles`.  
-En `patch` / `put_roles` el `detalle` incluye `antes` y `despues`. Las mutaciones de usuarios exigen persistir la traza (503 si falla Mongo); login/logout usan best-effort con log.
+Acciones runtime: `auth.login_google`, `auth.login_failed`, `auth.logout`, `usuarios.create`, `usuarios.patch`, `usuarios.put_roles`, `retrasos.create`, `retrasos.list_alumno`.  
+En `patch` / `put_roles` el `detalle` incluye `antes` y `despues`. Las mutaciones de usuarios exigen persistir la traza (503 si falla Mongo); login/logout/retrasos usan best-effort con log.
 
 ## Health
 

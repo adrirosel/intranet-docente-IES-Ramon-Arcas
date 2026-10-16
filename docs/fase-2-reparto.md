@@ -22,7 +22,8 @@ Acuerdo operativo entre **Adrian** y **Aymen**. Misma carga funcional, no mismo 
 | PWA shell (layout desktop/móvil) + onboarding | Aymen | Adrian | Visual Aymen; Adrian debe poder explicar HTML/CSS |
 | Roles/permisos capa completa + auditoría mínima | Adrian | Aymen | Backend auditoría cerrado en `feature/auditoria-roles`; UI consulta → rama aparte |
 
-| Retrasos (alta + histórico; sin stats al docente) | Adrian | Aymen | Stats solo vía Dashboard |
+| Retrasos (alta + histórico; sin stats al docente) | Adrian | Aymen | API en `feature/retrasos`; stats solo vía Dashboard |
+
 | Emplazamiento en aula | Adrian | Aymen | Diseños configurables + asociación a clase |
 | Docker / CI básica / hardening `.env` | Adrian | Aymen | Continuación de infra |
 
@@ -34,12 +35,13 @@ Acuerdo operativo entre **Adrian** y **Aymen**. Misma carga funcional, no mismo 
 4. Antes de merge: el revisor explica el diff (voz / Discord).
 5. Rotad dueño/revisor entre sprints cuando un bloque lo permita.
 
-## Estado Adrian — roles / auditoría
+## Estado Adrian — roles / auditoría / retrasos
 
 | Pieza | Estado | Rama |
 |-------|--------|------|
-| Backend auditoría (filtros fecha, eventos auth, antes/después, tests) | Hecho en `feature/auditoria-roles` | `feature/auditoria-roles` |
-| UI consulta auditoría (React) | Pendiente | Rama aparte tras merge del backend |
+| Backend auditoría (filtros fecha, eventos auth, antes/después, tests) | En `main` | `feature/auditoria-roles` (mergeado) |
+| UI consulta auditoría (React) | Pendiente | `feature/auditoria-ui` |
+| Retrasos API (alta + histórico; sin stats) | En curso | `feature/retrasos` |
 
 ## Fuera de Fase 2 (no abrir aún)
 

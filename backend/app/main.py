@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import anuncios, auditoria, auth, dashboard, fem, health, tickets, usuarios
+from app.api import anuncios, auditoria, auth, dashboard, fem, health, retrasos, tickets, usuarios
 from app.core.config import settings
 from app.core.database import close_mongo, close_redis, connect_mongo, connect_redis, get_db
 
@@ -16,7 +16,13 @@ async def lifespan(_app: FastAPI):
     await connect_mongo()
     await connect_redis()
     # Índices al arrancar.
-    from app.services import anuncio_service, auditoria_service, fem_service, ticket_service
+    from app.services import (
+        anuncio_service,
+        auditoria_service,
+        fem_service,
+        retraso_service,
+        ticket_service,
+    )
     from app.services.usuario_service import ensure_indexes
 
     db = get_db()
@@ -25,6 +31,7 @@ async def lifespan(_app: FastAPI):
     await ticket_service.ensure_indexes(db)
     await fem_service.ensure_indexes(db)
     await auditoria_service.ensure_indexes(db)
+    await retraso_service.ensure_indexes(db)
     yield
     await close_redis()
     await close_mongo()
@@ -56,3 +63,4 @@ app.include_router(tickets.router, prefix="/api/v1")
 app.include_router(fem.router, prefix="/api/v1")
 app.include_router(dashboard.router, prefix="/api/v1")
 app.include_router(auditoria.router, prefix="/api/v1")
+app.include_router(retrasos.router, prefix="/api/v1")
