@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { GoogleLoginButton } from './components/GoogleLoginButton'
 import { UsuariosAdmin } from './components/UsuariosAdmin'
 import { AnunciosPage } from './pages/AnunciosPage'
+import { FemPage } from './pages/FemPage'
 import { HomePage } from './pages/HomePage'
 import { PendingPage } from './pages/PendingPage'
 import { TicketsPage } from './pages/TicketsPage'
@@ -95,6 +96,7 @@ function App() {
             <HomePage user={user} horario={horario} onLogout={() => void onLogout()} />
             <AnunciosPage roles={user.roles} />
             <TicketsPage roles={user.roles} userId={user.id} />
+            <FemPage roles={user.roles} />
             <UsuariosAdmin enabled={user.roles.includes('admin')} />
           </>
         )}

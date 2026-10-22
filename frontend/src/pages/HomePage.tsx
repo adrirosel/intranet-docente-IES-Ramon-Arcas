@@ -43,8 +43,8 @@ export function HomePage({ user, horario, onLogout }: Props) {
           <dd>{user.departamento || '—'}</dd>
         </dl>
         <p className="hint modules-placeholder">
-          Más abajo en esta página: tablón de anuncios y cola de tickets (RMI / compras /
-          RRSS). FEM y el resto de Fase 2 se irán añadiendo después.
+          Más abajo: tablón de anuncios, cola de tickets y seguimiento FEM (si eres tutor o
+          admin). Dashboard y shell PWA se irán añadiendo después.
         </p>
       </section>
 

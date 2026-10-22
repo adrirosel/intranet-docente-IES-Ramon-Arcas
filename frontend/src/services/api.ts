@@ -293,6 +293,30 @@ export async function createTicketComentario(
   })
 }
 
+export type FemAlumno = {
+  id: string
+  nombre: string
+  empresa: string | null
+  estado: string | null
+  horas_cursadas: number
+  horas_totales: number
+  tutor_id: string | null
+}
+
+export async function listFemAlumnos(estado?: string): Promise<FemAlumno[]> {
+  const q = new URLSearchParams()
+  if (estado) q.set('estado', estado)
+  const suffix = q.toString() ? `?${q.toString()}` : ''
+  return apiFetch<FemAlumno[]>(`/api/v1/fem/alumnos${suffix}`)
+}
+
+export async function patchFemHoras(id: string, horas_cursadas: number): Promise<FemAlumno> {
+  return apiFetch<FemAlumno>(`/api/v1/fem/alumnos/${id}/horas`, {
+    method: 'PATCH',
+    body: JSON.stringify({ horas_cursadas }),
+  })
+}
+
 export async function logout(): Promise<void> {
   try {
     await apiFetch('/api/v1/auth/logout', { method: 'POST' })
