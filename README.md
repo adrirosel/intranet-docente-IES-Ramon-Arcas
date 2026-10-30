@@ -4,13 +4,29 @@ PWA de gestión interna para profesorado y equipo directivo. Forma parte del Pro
 
 ## Estado actual
 
-Base ejecutable en `main` (auth/usuarios + módulos Aymen + cierre de sesión Google):
+### Contrato (definición de endpoints)
 
-- Contrato API OpenAPI 3.x (`openapi/openapi.yaml`) alineado a la norma FastAPI (`detail`, paginación, `Location`)
+- OpenAPI 3.x ([`openapi/openapi.yaml`](openapi/openapi.yaml)) + tabla humana ([`docs/api-contract.md`](docs/api-contract.md))
+- 43 operaciones: Auth, Usuarios, Anuncios, Guardias, Ausencias (+ detalle), Tickets, FEM, Dashboard, Retrasos, Notificaciones, Auditoría, Health
+- Normas: errores `{detail}`, `201` + `Location`, recurso en mutaciones; paginación `{items,page,limit,total}` con excepciones documentadas (anuncios / tickets / guardias)
+- Guardias: `asignado_id` vs `cubre_id` + regla de rondas; firma: `manuscrita` \| `autofirma` + `firma_base64`
+
+### Runtime en `main`
+
+Base ejecutable (auth/usuarios + módulos Aymen + cierre de sesión Google + auditoría):
+
 - Backend FastAPI: health, auth Google + JWT + refresh HttpOnly (Redis), usuarios (+ RGPD), anuncios, tickets, FEM, dashboard, **auditoría** (`GET /api/v1/auditoria`, filtros de fecha, login/logout/fallos y CRUD usuarios)
-- Frontend Vite/React: login Google (GIS/FedCM), `auth/me`, perfil y horario propio, UI admin de usuarios / anuncios (horario solo si la cuenta está `activo`)
+- Frontend Vite/React: login Google (GIS/FedCM), `auth/me`, perfil y horario propio, UI admin de usuarios / anuncios y cola de tickets (horario solo si la cuenta está `activo`)
 - Docker Compose: MongoDB, Redis, backend (healthchecks + red `intranet`)
-- **Runtime pendiente (contrato ya definido):** guardias, ausencias (+ justificante/PDF/firma), retrasos, notificaciones (runtime completo); UI de consulta de auditoría
+
+### Runtime pendiente (contrato ya definido)
+
+- Guardias, ausencias (+ justificante/PDF/firma), retrasos, notificaciones (runtime completo)
+- UI de consulta de auditoría
+
+### Fuera de contrato aún (fases posteriores)
+
+Emplazamiento aula, convivencia, comparador de horarios, repositorio documental, reservas, comisiones, onboarding de contenido, mapa FEM, IA RRSS, Google Calendar. Ver [docs/architecture.md](docs/architecture.md) (temporalización) y [docs/api-contract.md](docs/api-contract.md).
 
 ## Arranque rápido
 
@@ -55,7 +71,7 @@ Compose espera a que Mongo y Redis estén healthy antes de arrancar el backend. 
 
 ## Ramas de trabajo
 
-- Integrar cambios a **`main` mediante Pull Request** (mismo repo, sin forks).
+- Integrar cambios a **`main`** mediante Pull Request (mismo repo, sin forks).
 - Features grandes en ramas propias (p. ej. `Adrian-guardias-ausencias`).
 - Antes de seguir o de abrir PR: `git fetch` y `git merge origin/main` en tu rama para evitar conflictos grandes.
 
@@ -78,7 +94,7 @@ Compose espera a que Mongo y Redis estén healthy antes de arrancar el backend. 
 | Documento | Contenido |
 |-----------|-----------|
 | [AGENTS.md](AGENTS.md) | Contexto permanente para agentes / Cursor |
-| [docs/architecture.md](docs/architecture.md) | Stack y capas |
+| [docs/architecture.md](docs/architecture.md) | Stack, capas, fases / temporalización |
 | [docs/api-contract.md](docs/api-contract.md) | Tabla oficial de endpoints |
 | [docs/roles-and-permissions.md](docs/roles-and-permissions.md) | Roles y permisos |
 | [docs/verification-cimientos.md](docs/verification-cimientos.md) | Checklist health + auth + `/auth/me` |
@@ -99,6 +115,8 @@ Compose espera a que Mongo y Redis estén healthy antes de arrancar el backend. 
 
 ## Próximos pasos
 
-1. **Fase 2** según [docs/fase-2-reparto.md](docs/fase-2-reparto.md) (Aymen: Anuncios/Tickets/FEM/Dashboard UI; Adrian: roles/retrasos/emplazamiento; auditoría runtime ya arrancada).
-2. Fase 3 (rama `Adrian-guardias-ausencias`): guardias, ausencias, justificante, PDF y firma.
-3. Runtime de notificaciones sobre la norma `{detail}`.
+1. Validar contrato con el profesorado.
+2. **Fase 2** según [docs/fase-2-reparto.md](docs/fase-2-reparto.md) (Aymen: Anuncios/Tickets/FEM/Dashboard UI; Adrian: roles/retrasos/emplazamiento; auditoría runtime ya arrancada).
+3. Fase 3 (rama `Adrian-guardias-ausencias`): guardias, ausencias, justificante, PDF y firma manuscrita (AutoFirma = mejor esfuerzo).
+4. Runtime de notificaciones (y UI de consulta de auditoría) sobre la norma `{detail}`.
+5. Definir en contrato (fase correspondiente) los módulos aún fuera de OpenAPI.

@@ -46,6 +46,8 @@ class UsuarioPublic(BaseModel):
     roles: list[str]
     estado: UsuarioEstado
     origen_alta: OrigenAlta | None = None
+    dni: str | None = None
+    telefono: str | None = None
 
 
 class UsuarioMe(UsuarioPublic):
@@ -68,9 +70,11 @@ class UsuarioPatch(BaseModel):
 
 
 class UsuarioMePatch(BaseModel):
-    """Campos que el propio usuario puede rectificar (RGPD)."""
+    """Campos que el propio usuario puede rectificar (RGPD / autocompletado PDF)."""
 
     name: str | None = None
+    dni: str | None = None
+    telefono: str | None = None
 
 
 class UsuarioRolesPut(BaseModel):
@@ -118,6 +122,8 @@ def doc_to_usuario(doc: dict[str, Any]) -> UsuarioPublic:
         roles=list(doc.get("roles", [])),
         estado=UsuarioEstado(doc.get("estado", UsuarioEstado.pendiente.value)),
         origen_alta=OrigenAlta(origen) if origen else None,
+        dni=doc.get("dni"),
+        telefono=doc.get("telefono"),
     )
 
 
