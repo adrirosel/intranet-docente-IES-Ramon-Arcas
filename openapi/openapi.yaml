@@ -354,7 +354,7 @@ paths:
     patch:
       tags: [Usuarios]
       summary: Modificacion parcial de usuario
-      description: Ejemplo de uso — aprobar alta pendiente (`estado: activo`).
+      description: "Ejemplo de uso — aprobar alta pendiente (`estado: activo`)."
       operationId: patchUsuario
       security:
         - BearerAuth: []
@@ -429,6 +429,9 @@ paths:
     get:
       tags: [Anuncios]
       summary: Feed del tablón
+      description: |
+        Feed segmentado (no paginado). Excepción a la norma `{items,page,limit,total}`:
+        el tablón devuelve el conjunto filtrado vigente (sin caducados).
       operationId: listAnuncios
       security:
         - BearerAuth: []
@@ -520,6 +523,9 @@ paths:
     get:
       tags: [Guardias]
       summary: Consultar cuadrante
+      description: |
+        Listado filtrado por fecha/franja (no paginado). Excepción a la norma
+        `{items,page,limit,total}`: el cuadrante se consulta por día.
       operationId: listGuardias
       security:
         - BearerAuth: []
@@ -554,8 +560,21 @@ paths:
       tags: [Guardias]
       summary: Ejecutar asignación por rondas
       description: |
-        Acción de negocio. La lógica vive en `services/guardias_service`.
-        Detalle del algoritmo: pendiente de implementacion (Fase 3).
+        Acción de negocio. La lógica vive en `services/guardias_service` (Fase 3).
+
+        **Regla de asignación (cerrada):**
+        1. En cada hueco puede haber más de un docente disponible.
+        2. El sistema mantiene, por docente y por hueco horario concreto, un contador
+           de guardias realizadas.
+        3. Al iniciar ronda, si hay empate en el contador entre disponibles del hueco,
+           la selección es aleatoria.
+        4. La comparación del contador es solo entre docentes disponibles en ese hueco,
+           nunca contra todo el claustro.
+        5. Si el docente `asignado_id` no puede asistir, otro disponible cubre
+           (`cubre_id`), aunque tenga más guardias realizadas; en rondas siguientes
+           se prioriza de nuevo a quien tenga menos.
+        6. `asignado_id` (a quien corresponde por ronda) y `cubre_id` (quien realiza)
+           pueden diferir.
       operationId: asignarGuardias
       security:
         - BearerAuth: []
@@ -567,11 +586,13 @@ paths:
               $ref: '#/components/schemas/GuardiaAsignarRequest'
       responses:
         '200':
-          description: Asignación ejecutada
+          description: Guardias asignadas en la ejecución
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResourceAck'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Guardia'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -583,6 +604,9 @@ paths:
     patch:
       tags: [Guardias]
       summary: Modificar docente que cubre la guardia
+      description: |
+        Permite cambiar `cubre_id` (quien realiza) sin alterar necesariamente
+        `asignado_id` (quien correspondía por ronda).
       operationId: patchGuardia
       security:
         - BearerAuth: []
@@ -600,7 +624,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResourceAck'
+                $ref: '#/components/schemas/Guardia'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -633,19 +657,45 @@ paths:
       responses:
         '201':
           description: Ausencia creada
+          headers:
+            Location:
+              schema:
+                type: string
+                example: /api/v1/ausencias/64f1a2b3c4d5e6f7a8b9c0d5
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResourceAck'
-              example:
-                code: 201
-                msg: La operacion se ha realizado correctamente
+                $ref: '#/components/schemas/Ausencia'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+
+  /api/v1/ausencias/{id}:
+    get:
+      tags: [Ausencias]
+      summary: Detalle de una ausencia
+      description: Requiere ser dueño de la ausencia (o `admin` / `jefatura`).
+      operationId: getAusencia
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      responses:
+        '200':
+          description: Ausencia
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ausencia'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   /api/v1/ausencias/{id}/justificante:
     post:
@@ -716,8 +766,10 @@ paths:
       tags: [Ausencias]
       summary: Insertar firma
       description: |
-        Firma manuscrita/electrónica (AutoFirma u otro mecanismo).
-        **PENDIENTE DE DECISIÓN:** formato exacto del payload de firma.
+        Incrusta la firma en el PDF de la ausencia.
+
+        - `proveedor: manuscrita` — objetivo garantizado (imagen capturada en pantalla, PNG/JPEG en base64).
+        - `proveedor: autofirma` — mejor esfuerzo (depende de certificado y AutoFirma en el cliente).
       operationId: firmarAusencia
       security:
         - BearerAuth: []
@@ -731,11 +783,11 @@ paths:
               $ref: '#/components/schemas/FirmaRequest'
       responses:
         '200':
-          description: Firma registrada
+          description: Ausencia firmada
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DetailMessage'
+                $ref: '#/components/schemas/Ausencia'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -751,6 +803,9 @@ paths:
     get:
       tags: [Tickets]
       summary: Listar tickets
+      description: |
+        Listado filtrado por tipo/estado (no paginado). Excepción a la norma
+        `{items,page,limit,total}`: cola operativa acotada por filtros.
       operationId: listTickets
       security:
         - BearerAuth: []
@@ -1359,7 +1414,7 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorDetail'
           example:
-            detail: Se requiere uno de estos roles: admin
+            detail: "Se requiere uno de estos roles: admin"
     NotFound:
       description: Recurso no encontrado
       content:
@@ -1408,11 +1463,6 @@ components:
         detail:
           type: string
 
-    ResourceAck:
-      type: object
-      description: Respuesta generica de accion de negocio (modulos pendientes)
-      additionalProperties: true
-
     GoogleAuthRequest:
       type: object
       required: [id_token]
@@ -1459,6 +1509,12 @@ components:
           $ref: '#/components/schemas/UsuarioEstado'
         origen_alta:
           $ref: '#/components/schemas/OrigenAlta'
+        dni:
+          type: string
+          nullable: true
+        telefono:
+          type: string
+          nullable: true
 
     UsuarioPaginated:
       type: object
@@ -1595,7 +1651,10 @@ components:
 
     Guardia:
       type: object
-      required: [id, fecha, franja]
+      required: [id, fecha, franja, estado]
+      description: |
+        Distingue docente asignado por ronda (`asignado_id`) de quien realiza
+        la guardia (`cubre_id`). Pueden no coincidir.
       properties:
         id:
           type: string
@@ -1607,9 +1666,15 @@ components:
         ausente_id:
           type: string
           nullable: true
+          description: Docente cuya ausencia genera el hueco de guardia
+        asignado_id:
+          type: string
+          nullable: true
+          description: Docente al que corresponde la guardia por ronda/contador
         cubre_id:
           type: string
           nullable: true
+          description: Docente que finalmente realiza/cubre la guardia
         estado:
           type: string
           enum: [pendiente, asignada, cubierta]
@@ -1628,6 +1693,7 @@ components:
       properties:
         cubre_id:
           type: string
+          description: Cambiar quien realiza la guardia (sin exigir cambio de asignado_id)
         estado:
           type: string
           enum: [pendiente, asignada, cubierta]
@@ -1635,6 +1701,53 @@ components:
     AusenciaTipo:
       type: string
       enum: [generica, administrativa, extraescolar]
+
+    AusenciaEstado:
+      type: string
+      enum: [registrada, pendiente_justificante, pendiente_firma, firmada]
+      description: |
+        Flujo genérico: registrada → (si genérica, tras la guardia) pendiente_justificante
+        → pendiente_firma → firmada. Administrativa/extraescolar pueden omitir justificante.
+
+    Ausencia:
+      type: object
+      required: [id, docente_id, tipo, estado, fecha_inicio, fecha_fin]
+      properties:
+        id:
+          type: string
+        docente_id:
+          type: string
+        tipo:
+          $ref: '#/components/schemas/AusenciaTipo'
+        estado:
+          $ref: '#/components/schemas/AusenciaEstado'
+        fecha_inicio:
+          type: string
+          format: date
+        fecha_fin:
+          type: string
+          format: date
+        motivo:
+          type: string
+          nullable: true
+        franjas:
+          type: array
+          items:
+            type: string
+          description: Huecos horarios afectados; vacío o ausente = día completo
+        justificante_url:
+          type: string
+          nullable: true
+        firmada:
+          type: boolean
+          default: false
+        firma_proveedor:
+          allOf:
+            - $ref: '#/components/schemas/FirmaProveedor'
+          nullable: true
+        creado_en:
+          type: string
+          format: date-time
 
     AusenciaCreate:
       type: object
@@ -1650,16 +1763,31 @@ components:
           format: date
         motivo:
           type: string
+        franjas:
+          type: array
+          items:
+            type: string
+          description: Si se omite, se interpreta como día completo
+
+    FirmaProveedor:
+      type: string
+      enum: [manuscrita, autofirma]
+      description: |
+        `manuscrita` = objetivo garantizado del proyecto.
+        `autofirma` = mejor esfuerzo (certificado + AutoFirma en el equipo del usuario).
 
     FirmaRequest:
       type: object
+      required: [proveedor, firma_base64]
       properties:
+        proveedor:
+          $ref: '#/components/schemas/FirmaProveedor'
         firma_base64:
           type: string
-          description: Imagen o payload de firma (formato PENDIENTE DE DECISIÓN)
-        proveedor:
-          type: string
-          example: autofirma
+          description: |
+            Imagen de la firma en base64 (PNG o JPEG), sin prefijo data-URL obligatorio.
+            Con `manuscrita` es la captura en pantalla; con `autofirma` el payload
+            que el cliente obtenga del proceso de firma.
 
     TicketTipo:
       type: string
@@ -1787,10 +1915,17 @@ components:
       type: object
       additionalProperties: false
       description: |
-        Campos que el propio usuario puede rectificar.
-        PENDIENTE DE DECISION: campos de perfil para autocompletar PDF sin OAuth.
+        Campos que el propio usuario puede rectificar (RGPD).
+        Para autocompletar PDF sin datos OAuth se usan `name` y, si existen en perfil,
+        `dni` / `telefono` (opcionales).
       properties:
         name:
+          type: string
+          minLength: 1
+        dni:
+          type: string
+          minLength: 1
+        telefono:
           type: string
           minLength: 1
 

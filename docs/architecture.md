@@ -88,15 +88,42 @@ Endpoints operativos (fuera del contrato de negocio):
 - `GET /health` — proceso vivo
 - `GET /health/ready` — dependencias (Mongo, Redis) disponibles
 
+## Temporalización (fases)
+
+Alineada a la memoria del proyecto (apartado 5.14) y al estado del repositorio:
+
+| Fase | Contenido memoria | Estado en este repo |
+|------|-------------------|---------------------|
+| **1 — Cimientos** | Esquema / temporalización; auth básica; núcleo de roles | **Hecho.** OpenAPI + docs, Google OAuth + JWT/Redis, roles, Docker Compose, PWA mínima |
+| **2 — Núcleo funcional** | Anuncios, FEM, RRSS/IA, retrasos, aula, roles completos, onboarding, RMI/compras | **Parcial.** Runtime: anuncios, tickets (RMI/RRSS/compras), FEM (alumnos/horas), dashboard. Contrato: retrasos. Pendiente: emplazamiento aula, onboarding UI, IA RRSS, mapa FEM |
+| **3 — Guardias y firma** | Guardias + ausencias/firma; convivencia; comisiones; módulo ticket restante | **Contrato definido** (guardias/ausencias/firma). Runtime: rama `Adrian-guardias-ausencias`. Convivencia / comisiones / reservas / docs: fuera de contrato aún |
+| **4 — Integraciones** | OAuth completo, Calendar, notificaciones push/email, docs técnicas | **Contrato** notificaciones + auditoría. Runtime y PWA instalable / Calendar: pendiente |
+
+### Ownership orientativo
+
+- **Adrian** (`Adrian-guardias-ausencias`): runtime de guardias, ausencias, justificante, PDF y firma.
+- Módulos ya en `main` (auth, usuarios, anuncios, tickets, FEM, dashboard): base compartida; cambios vía PR a `main`.
+
+## Fuera de este contrato (fases posteriores)
+
+Sin endpoints en OpenAPI todavía (detalle en [api-contract.md](api-contract.md)):
+
+- Emplazamiento en el aula, aula de convivencia, comparador de horarios
+- Repositorio documental, reservas de espacios/recursos, comisiones de servicio
+- Onboarding / primeros pasos (contenido)
+- Mapa FEM / empresas, generación IA de borrador RRSS, Google Calendar
+
 ## Decisiones cerradas
 
 - Payload `POST /auth/google`: `id_token`.
 - Sin whitelist de dominio Google.
 - Refresh token en cookie HttpOnly (no body).
 - Errores API: `{"detail": "..."}` (norma FastAPI / apuntes).
-- Listados paginados: `{ items, page, limit, total }`.
+- Listados paginados: `{ items, page, limit, total }`, con excepciones documentadas (anuncios, tickets, guardias → array).
+- Guardias: `asignado_id` (ronda) vs `cubre_id` (quien realiza); regla de rondas en OpenAPI / api-contract.
+- Firma PDF: `proveedor` `manuscrita` \| `autofirma` + `firma_base64` (manuscrita = objetivo garantizado).
+- Perfil para PDF: `UsuarioMePatch` con `name`, `dni`, `telefono`.
 
 ## Pendiente de decisión
 
-- Algoritmo concreto de asignación de guardias “por rondas”.
-- Librerías concretas: generación PDF, email, push (VAPID), AutoFirma, módulo de IA para RRSS.
+- Librerías concretas: generación PDF, email, push (VAPID), AutoFirma cliente, módulo de IA para RRSS.

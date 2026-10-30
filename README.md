@@ -4,13 +4,26 @@ PWA de gestión interna para profesorado y equipo directivo. Forma parte del Pro
 
 ## Estado actual
 
-Base ejecutable en `main` (auth/usuarios + módulos Aymen + cierre de sesión Google):
+### Contrato (definición de endpoints)
 
-- Contrato API OpenAPI 3.x (`openapi/openapi.yaml`) alineado a la norma FastAPI (`detail`, paginación, `Location`)
+- OpenAPI 3.x ([`openapi/openapi.yaml`](openapi/openapi.yaml)) + tabla humana ([`docs/api-contract.md`](docs/api-contract.md))
+- 43 operaciones: Auth, Usuarios, Anuncios, Guardias, Ausencias (+ detalle), Tickets, FEM, Dashboard, Retrasos, Notificaciones, Auditoría, Health
+- Normas: errores `{detail}`, `201` + `Location`, recurso en mutaciones; paginación `{items,page,limit,total}` con excepciones documentadas (anuncios / tickets / guardias)
+- Guardias: `asignado_id` vs `cubre_id` + regla de rondas; firma: `manuscrita` \| `autofirma` + `firma_base64`
+
+### Runtime en `main`
+
 - Backend FastAPI: health, auth Google + JWT + refresh HttpOnly (Redis), usuarios (+ RGPD), anuncios, tickets, FEM, dashboard
 - Frontend Vite/React: login Google (GIS/FedCM), `auth/me`, perfil y horario propio (horario solo si la cuenta está `activo`)
 - Docker Compose: MongoDB, Redis, backend
-- **Runtime pendiente (contrato ya definido):** guardias, ausencias (+ justificante/PDF/firma), retrasos, notificaciones, auditoría
+
+### Runtime pendiente (contrato ya definido)
+
+- Guardias, ausencias (+ justificante / PDF / firma), retrasos, notificaciones, auditoría
+
+### Fuera de contrato aún (fases posteriores)
+
+Emplazamiento aula, convivencia, comparador de horarios, repositorio documental, reservas, comisiones, onboarding de contenido, mapa FEM, IA RRSS, Google Calendar. Ver [docs/architecture.md](docs/architecture.md) (temporalización) y [docs/api-contract.md](docs/api-contract.md).
 
 ## Arranque rápido
 
@@ -50,7 +63,7 @@ npm run dev
 
 ## Ramas de trabajo
 
-- Integrar cambios a **`main` mediante Pull Request** (mismo repo, sin forks).
+- Integrar cambios a **`main`** mediante Pull Request (mismo repo, sin forks).
 - Features grandes en ramas propias (p. ej. `Adrian-guardias-ausencias`).
 - Antes de seguir o de abrir PR: `git fetch` y `git merge origin/main` en tu rama para evitar conflictos grandes.
 
@@ -65,7 +78,7 @@ npm run dev
 | Documento | Contenido |
 |-----------|-----------|
 | [AGENTS.md](AGENTS.md) | Contexto permanente para agentes / Cursor |
-| [docs/architecture.md](docs/architecture.md) | Stack y capas |
+| [docs/architecture.md](docs/architecture.md) | Stack, capas, fases / temporalización |
 | [docs/api-contract.md](docs/api-contract.md) | Tabla oficial de endpoints |
 | [docs/roles-and-permissions.md](docs/roles-and-permissions.md) | Roles y permisos |
 | [openapi/openapi.yaml](openapi/openapi.yaml) | Contrato OpenAPI |
@@ -85,5 +98,6 @@ npm run dev
 ## Próximos pasos
 
 1. Validar contrato con el profesorado.
-2. **Adrian** (rama `Adrian-guardias-ausencias`): guardias, ausencias, justificante, PDF y firma (formato de firma: PENDIENTE DE DECISIÓN / Autofirma).
+2. **Adrian** (rama `Adrian-guardias-ausencias`): runtime de guardias, ausencias, justificante, PDF y firma manuscrita (AutoFirma = mejor esfuerzo).
 3. Runtime de retrasos, notificaciones y auditoría sobre la norma `{detail}`.
+4. Definir en contrato (fase correspondiente) los módulos aún fuera de OpenAPI.

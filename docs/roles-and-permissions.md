@@ -37,7 +37,7 @@ Ejemplo: `GET /ausencias/{id}/pdf` requiere autenticación **y** ser el dueño (
 | Consultar guardias | sí | sí | sí | sí | sí | sí |
 | Asignar / modificar guardias | sí | — | sí | — | — | — |
 | Registrar ausencias propias | sí | sí | sí | sí | sí | sí |
-| Justificante / PDF / firma (propias) | sí* | sí* | sí* | sí* | sí* | sí* |
+| Ver detalle / justificante / PDF / firma (propias) | sí* | sí* | sí* | sí* | sí* | sí* |
 | Crear / ver tickets | sí | sí | sí | sí | sí | sí |
 | Transicionar estado de ticket | sí | — | — | — | — | sí (asignados) |
 | Comentarios en ticket | sí | sí† | sí† | sí† | sí† | sí |
